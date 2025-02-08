@@ -1,30 +1,45 @@
 import { useAuth } from "../services/firebaseconnect";
+import { Navigate } from "react-router-dom";
+import "./styles.css";
 
-function Test() {
-  const { email, setEmail, password, setPassword, handleLogin, handleLogout, handlePasswordReset } = useAuth();
+function PageConnexion() {
+  const { email, setEmail, password, setPassword, handleLogin, user } = useAuth();
+
+  // Si l'utilisateur est déjà connecté, le rediriger vers /test
+  if (user) {
+    return <Navigate to="/test" />;
+  }
 
   return (
-    <div>
-      {/* Ton JSX ici pour afficher l'interface de connexion */}
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mot de passe"
-        />
-        <button type="submit">Se connecter</button>
-      </form>
-      <button onClick={handlePasswordReset}>Mot de passe oublié</button>
-      <button onClick={handleLogout}>Se déconnecter</button>
-    </div>
-  );
-};
+      <div className="container">
+        <div className="container-login">
+          <h1 className="title">Sign in to your account</h1>
+          <form onSubmit={handleLogin} className="form-connexion">
+            <label htmlFor="email" className="label-form-connexion">Email</label>
+            <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="form-email"
+            />
+            <label htmlFor="password" className="label-form-connexion">Password</label>
+            <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mot de passe"
+                className="form-password"
+            />
+            <div className="conteneur-reset-password">
+              <button className="reset-password" /* onClick={handlePasswordReset} */>Mot de passe oublié</button>
+            </div>
+            <button type="submit" className="form-submit">Se connecter</button>
+          </form>
 
-export default Test;
+        </div>
+      </div>
+  );
+}
+
+export default PageConnexion;
