@@ -1,6 +1,6 @@
 import { useAuth } from "../services/firebaseconnect";
 import { Navigate } from "react-router-dom";
-import "./styles.css";
+import "../css/styles.css";
 
 function PageConnexion() {
   const { email, setEmail, password, setPassword, handleLogin, user } = useAuth();

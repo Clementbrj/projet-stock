@@ -1,8 +1,9 @@
 import { useAuth } from "../services/firebaseconnect";
-import "./statistique.css";
+import "../css/statistique.css";
 import {Link} from "react-router-dom";
 import React from "react";
 import { useAuthContext } from "./AuthProvider";
+import NavBar from "../components/NavBar";
 
 
 function Statistiques() {
@@ -11,14 +12,7 @@ function Statistiques() {
     const { user, handleLogout } = useAuthContext();
     return (
         <>
-            <nav className="nav-statistique">
-                <div className="liste-pages">
-                    <img src="logo192.png" alt="logo entreprise" className="image_entreprise" />
-                    <Link to="/statistiques" className="lien-page-statistiques">Statistiques</Link>
-                    <Link to="/fournisseur" className="lien-page-fournisseur">Liste Fournisseur</Link>
-                </div>
-                <button /*onClick={handleLogout} */className="button-deconnexion">Se déconnecter</button>
-            </nav>
+            <NavBar />
             <main className="statistique">
                 <h1 className="title">Tableau de board</h1>
             </main>
@@ -26,5 +20,4 @@ function Statistiques() {
         </>
     );
 };
-/* <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>*/
 export default Statistiques;

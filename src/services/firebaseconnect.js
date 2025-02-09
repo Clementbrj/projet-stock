@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "./firebaseconfig";
 import { useNavigate } from "react-router-dom";
 
-
 // Déclarer les états email et password dans firebaseconnect
 export const useAuth = () => {
   const [email, setEmail] = useState("");
@@ -12,37 +11,34 @@ export const useAuth = () => {
   const auth = getAuth();
   const navigate = useNavigate();
 
-
   // Fonction pour connecter un utilisateur
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/");
+      navigate("/statistiques"); // Redirige vers statistique_page après connexion
     } catch (error) {
       console.error("Erreur de connexion : ", error.message);
     }
   };
-
 
   // Fonction pour gérer la déconnexion
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setUser(null);
-      navigate("/auth");
+      navigate("/test"); // Redirige vers la page test après déconnexion
     } catch (error) {
       console.error("Erreur lors de la déconnexion : ", error.message);
     }
   };
 
-
-  // La fonction ce lance lorsque le composant est chargé / gérer l'état utilisateur avec onAuthStateChanged
+  // Vérifier l'état de l'utilisateur à l'ouverture de l'application
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        navigate("/"); // Si l'utilisateur est connecté, redirige
+        navigate("/statistiques"); // Redirige vers statistique_page si l'utilisateur est connecté
       }
     });
 
@@ -50,7 +46,6 @@ export const useAuth = () => {
       unsubscribe(); // Nettoyage de l'écouteur
     };
   }, [auth, navigate]);
-
 
   // Fonction pour envoyer un email de réinitialisation de mot de passe
   const handlePasswordReset = async (e) => {
@@ -63,7 +58,7 @@ export const useAuth = () => {
     }
   };
 
-
-  //Renvoi toutes les variables / Fonctions nécessaire au front
-  return { email, setEmail, password, setPassword, handleLogin, handleLogout, handlePasswordReset };
+  // Renvoi toutes les variables / Fonctions nécessaires au front
+  return {email, setEmail, password, setPassword, user, handleLogin, handleLogout, handlePasswordReset
+  };
 };

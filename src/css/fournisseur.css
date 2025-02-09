@@ -12,6 +12,10 @@
     height: 5%;
     margin-right: 5%;
 }
+.liste-pages {
+    display: flex;
+    align-items: center;
+}
 
 .lien-page-statistiques{
     margin-right: 2%;
