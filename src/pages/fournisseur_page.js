@@ -1,5 +1,5 @@
 import { useAuth } from "../services/firebaseconnect";
-import "./fournisseur.css";
+import "../styles/fournisseur.css";
 import {Link} from "react-router-dom";
 function Fournisseur() {
     /*  const { email, setEmail, password, setPassword, handleLogin, handleLogout, handlePasswordReset } = useAuth();

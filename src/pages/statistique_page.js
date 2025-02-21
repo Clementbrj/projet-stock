@@ -1,5 +1,5 @@
 import { useAuth } from "../services/firebaseconnect";
-import "./statistique.css";
+import "../styles/statistique.css";
 import {Link} from "react-router-dom";
 import React from "react";
 import { useAuthContext } from "./AuthProvider";
