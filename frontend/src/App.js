@@ -16,8 +16,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/PageConnexion" />} />
           <Route path="/PageConnexion" element={<PageConnexion />} />
-          <Route path="/statistiques" element={<ProtectedRoute><Statistiques /></ProtectedRoute>} />
-          <Route path="/fournisseur" element={<ProtectedRoute><Fournisseur /></ProtectedRoute>} />
+          <Route path="/statistiques" element={<ProtectedRoute>*/<Statistiques />/*</ProtectedRoute>} />
+          <Route path="/fournisseur" element={<ProtectedRoute>*/<Fournisseur />/*</ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
