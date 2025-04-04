@@ -1,0 +1,35 @@
+.nav-statistique{
+    display: flex;
+    align-items: center;
+    background-color: #4a80f7;
+    padding: 2%;
+    margin-bottom: 2%;
+    justify-content: space-between;
+
+}
+.image_entreprise{
+    width: 5%;
+    height: 5%;
+    margin-right: 5%;
+}
+
+.lien-page-statistiques{
+    margin-right: 2%;
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
+}
+.lien-page-fournisseur{
+    margin-right: 2%;
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
+}
+.statistique {
+    margin: 2%;
+}
+.button-deconnexion {
+    border-radius: 10px;
+    padding: 1%;
+    background-color: #ff4747;
+}
