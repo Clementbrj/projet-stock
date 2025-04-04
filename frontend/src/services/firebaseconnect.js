@@ -16,7 +16,7 @@ export const useAuth = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/statistiques");
     } catch (error) {
-      console.error("Erreur de connexion : ", error.message);
+      console.error("Connexion Firebase : ", error.message);
     }
   };
 
@@ -26,7 +26,7 @@ export const useAuth = () => {
       setUser(null);
       navigate("/PageConnexion");
     } catch (error) {
-      console.error("Erreur lors de la déconnexion : ", error.message);
+      console.error("Déconnexion Firebase : ", error.message);
     }
   };
 
@@ -46,7 +46,7 @@ export const useAuth = () => {
       await sendPasswordResetEmail(auth, email);
       alert("Un email de réinitialisation a été envoyé !");
     } catch (error) {
-      console.error("Erreur lors de la réinitialisation du mot de passe : ", error.message);
+      console.error("PasswordReset FireBase : ", error.message);
     }
   };
 
