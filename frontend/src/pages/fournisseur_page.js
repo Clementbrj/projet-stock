@@ -1,6 +1,6 @@
 import "../styles/fournisseur.css";
 import FournisseurNav from "../components/Fournisseur_navigation";
-import TableFournisseur from "../components/Fournisseur_table";
+import TableFournisseur from "../components/FournisseurTable";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
