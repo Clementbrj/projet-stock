@@ -46,26 +46,27 @@ app.get('/', (req,res) => {
 // --
 //  Create---------------------------------------
 app.post('/entrepot/create', (req, res) => {
-  const { nom } = req.query;
-  
-  if (!nom) {
-    return res.status(400).send("Le nom de l'entrepôt est obligatoire");
+  const { nom, adresse, capacite } = req.body;
+
+  if (!nom || !adresse || !capacite) {
+    return res.status(400).send("Le nom, l'adresse et la capacité de l'entrepôt sont obligatoires");
   }
 
-  const query = 'INSERT INTO entrepot (nom) VALUES (?)';
+  const query = 'INSERT INTO entrepot (nom, adresse, capacite) VALUES (?, ?, ?)';
 
-  db.query(query, [nom], (err) => {
+  db.query(query, [nom, adresse, capacite], (err, result) => {
     if (err) {
       return res.status(500).send('Problème MySQL C-Entrepôt');
     }
 
-    res.status(200).send("success");
+    res.status(200).json({ id: result.insertId, nom, adresse, capacite });
   });
 });
 
 // Read---------------------------------------
-app.get('/entrepot/read', (req,res) => {
-  const query = 'SELECT * FROM entrepot';
+app.get('/entrepot/read', (req, res) => {
+  const sortBy = req.query.sortBy || 'nom';
+  const query = `SELECT * FROM entrepot ORDER BY ${sortBy} ASC`;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -185,6 +186,89 @@ app.post('/fournisseur/create', (req, res) => {
     });
   });
 
+
+// --
+// Commande
+// --
+// Create---------------------------------------
+app.post('/commande/create', (req, res) => {
+  const { fournisseur_id, entrepot_id, date_commande, statut } = req.body;
+
+  if (!fournisseur_id || !entrepot_id || !date_commande || !statut) {
+    return res.status(400).send("Tous les champs sont obligatoires");
+  }
+
+  const query = 'INSERT INTO commande (fournisseur_id, entrepot_id, date_commande, statut) VALUES (?, ?, ?, ?)';
+
+  db.query(query, [fournisseur_id, entrepot_id, date_commande, statut], (err, result) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL C-Commande');
+    }
+
+    res.status(200).json({ id: result.insertId, fournisseur_id, entrepot_id, date_commande, statut });
+  });
+});
+
+// Read---------------------------------------
+app.get('/commande/read', (req, res) => {
+  const sortBy = req.query.sortBy || 'date_commande';
+  const query = `
+    SELECT commande.*, fournisseur.nom AS fournisseur_nom, entrepot.nom AS entrepot_nom
+    FROM commande
+    JOIN fournisseur ON commande.fournisseur_id = fournisseur.id
+    JOIN entrepot ON commande.entrepot_id = entrepot.id
+    ORDER BY ${sortBy} DESC
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL R-Commande');
+    }
+
+    res.status(200).json(results); 
+  });
+});
+
+// Update---------------------------------------
+app.put('/commande/update/:id', (req, res) => {
+  const { id } = req.params;
+  const { fournisseur_id, entrepot_id, date_commande, statut } = req.body;
+
+  if (!fournisseur_id || !entrepot_id || !date_commande || !statut) {
+    return res.status(400).send("Tous les champs sont requis");
+  }
+
+  const query = `
+    UPDATE commande
+    SET fournisseur_id = ?, entrepot_id = ?, date_commande = ?, statut = ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [fournisseur_id, entrepot_id, date_commande, statut, id], (err) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL U-Commande');
+    }
+
+    res.status(200).send("success");
+  });
+});
+
+// Delete---------------------------------------
+app.delete('/commande/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM commande WHERE id = ?';
+
+  db.query(query, [id], (err) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL D-Commande');
+    }
+
+    res.status(200).send("success");
+  });
+});
+
+  
 /* ------------------
     Express
 -------------------*/
