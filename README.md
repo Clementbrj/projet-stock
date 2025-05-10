@@ -64,12 +64,21 @@ puis créer les tables :
     FOREIGN KEY (id_produit) REFERENCES produit(id)
     );
 
-    CREATE TABLE commande (
+CREATE TABLE commande (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_fournisseur INT,
-    id_produit INT,
-    quantite INT,  -- Quantité commandée
+    id_entrepot INT,
     date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'en attente',
     FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id),
+    FOREIGN KEY (id_entrepot) REFERENCES entrepot(id)
+);
+
+CREATE TABLE produit_commande (
+    id_commande INT,
+    id_produit INT,
+    quantite INT,
+    PRIMARY KEY (id_commande, id_produit),
+    FOREIGN KEY (id_commande) REFERENCES commande(id),
     FOREIGN KEY (id_produit) REFERENCES produit(id)
-    );
+);

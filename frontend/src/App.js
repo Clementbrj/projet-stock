@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PageConnexion from "./pages/connect_page";
 import Statistiques from "./pages/statistique_page";
 import Fournisseur from "./pages/fournisseur_page";
+import Entrepot from "./pages/entrepot_page";
+import CommandePage from "./pages/commande_page";
+
 import { AuthProvider, useAuthContext } from "./pages/AuthProvider";
 
 const ProtectedRoute = ({ children }) => {
@@ -18,6 +21,8 @@ function App() {
           <Route path="/PageConnexion" element={<PageConnexion />} />
           <Route path="/statistiques" element={<ProtectedRoute><Statistiques /></ProtectedRoute>} />
           <Route path="/fournisseur" element={<ProtectedRoute><Fournisseur /></ProtectedRoute>} />
+          <Route path="/entrepot" element={<ProtectedRoute><Entrepot /></ProtectedRoute>} />
+          <Route path="/commande" element={<ProtectedRoute><CommandePage /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

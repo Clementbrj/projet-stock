@@ -13,18 +13,13 @@
     margin-right: 5%;
 }
 
-.lien-page-statistiques{
+.lien{
     margin-right: 2%;
     text-decoration: none;
     color: #000000;
     font-weight: bold;
 }
-.lien-page-fournisseur{
-    margin-right: 2%;
-    text-decoration: none;
-    color: #000000;
-    font-weight: bold;
-}
+
 .statistique {
     margin: 2%;
 }

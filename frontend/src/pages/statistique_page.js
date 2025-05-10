@@ -12,8 +12,10 @@ function Statistiques() {
             <nav className="nav-statistique">
                 <div className="liste-pages">
                     <img src="logo192.png" alt="logo entreprise" className="image_entreprise" />
-                    <Link to="/statistiques" className="lien-page-statistiques">Statistiques</Link>
-                    <Link to="/fournisseur" className="lien-page-fournisseur">Liste Fournisseur</Link>
+                    <Link to="/statistiques" className="lien">Statistiques</Link>
+                    <Link to="/fournisseur" className="lien">Fournisseur</Link>
+                    <Link to="/entrepot" className="lien">Entrepôt</Link>
+                    <Link to="/commande" className="lien">Commande</Link>
                 </div>
                 <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>
             </nav>
