@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "./firebaseconfig";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, createUserWithEmailAndPassword } from "./firebaseconfig";
 import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
@@ -10,6 +10,7 @@ export const useAuth = () => {
   const auth = getAuth();
   const navigate = useNavigate();
 
+  // Login state
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -20,6 +21,7 @@ export const useAuth = () => {
     }
   };
 
+  // Logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -30,16 +32,7 @@ export const useAuth = () => {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [auth, navigate]);
-
+  // Password Reset
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     try {
@@ -50,5 +43,30 @@ export const useAuth = () => {
     }
   };
 
-  return { email, setEmail, password, setPassword, handleLogin, handleLogout, handlePasswordReset, user };
+  // Sign Up
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Inscription réussie !");
+      navigate("/statistiques");
+    } catch (error) {
+      console.error("Inscription Firebase : ", error.message);
+    }
+  };
+
+  // ---------------------------
+  // Dynamic management
+  // ---------------------------
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [auth, navigate]);
+
+  return { email, setEmail, password, setPassword, handleLogin, handleLogout, handlePasswordReset, handleSignUp, user };
 };

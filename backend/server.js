@@ -315,6 +315,26 @@ app.get('/commande/read2', (req, res) => {
   });
 });
 
+// Update order status
+app.put('/commande/update-status/:id', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).send("Statut requis");
+  }
+
+  const query = 'UPDATE commande SET status = ? WHERE id = ?';
+
+  db.query(query, [status, id], (err) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL U-Commande');
+    }
+
+    res.status(200).send("success");
+  });
+});
+
 // Delete---------------------------------------
 app.delete('/commande/delete/:id', (req, res) => {
   const { id } = req.params;

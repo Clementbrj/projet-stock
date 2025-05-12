@@ -1,11 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyC55-HB6_ezOhTIYrWeGzv_qaMnGvZbJqg",
   authDomain: "stock-manager-817f2.firebaseapp.com",
@@ -19,4 +16,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export {  app, getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut };
+// Export the functions you need
+export { app, getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, createUserWithEmailAndPassword };
