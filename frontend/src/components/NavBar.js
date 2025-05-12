@@ -15,6 +15,7 @@ function Navbar() {
                     <Link to="/fournisseur" className="lien">Fournisseur</Link>
                     <Link to="/entrepot" className="lien">Entrepôt</Link>
                     <Link to="/commande" className="lien">Commande</Link>
+                    <Link to="/produit" className="lien">Produit</Link>
                 </div>
                 <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>
             </nav>
