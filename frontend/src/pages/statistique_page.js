@@ -1,30 +1,66 @@
-// import { useAuth } from "../services/firebaseconnect";
 import "../styles/statistique.css";
-import {Link} from "react-router-dom";
-import React from "react";
-import { useAuthContext } from "./AuthProvider";
-
+import {useEffect, useState} from "react";
+import axios from "axios";
+import {useAuthContext} from "./AuthProvider";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
+import TableProduit from "../components/TableProduit";
+import TableCommande from "../components/TableCommande";
+import TableStock from "../components/TableStock";
 
 function Statistiques() {
-    const { handleLogout } = useAuthContext();
+    const {handleLogout} = useAuthContext();
+    const [produits, setProduits] = useState([]);
+    const [selectedProduitId, setSelectedProduitId] = useState("");
+
+    useEffect(() => {
+        axios.get("http://localhost:3100/produit/read")
+            .then((res) => {
+                setProduits(res.data);
+            })
+            .catch((err) => {
+                console.error("Erreur chargement produits :", err);
+            });
+    }, []);
+
     return (
         <>
-            <nav className="nav-statistique">
-                <div className="liste-pages">
-                    <img src="logo192.png" alt="logo entreprise" className="image_entreprise" />
-                    <Link to="/statistiques" className="lien">Statistiques</Link>
-                    <Link to="/fournisseur" className="lien">Fournisseur</Link>
-                    <Link to="/entrepot" className="lien">Entrepôt</Link>
-                    <Link to="/commande" className="lien">Commande</Link>
-                </div>
-                <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>
-            </nav>
+            <Navbar/>
             <main className="statistique">
-                <h1 className="title">Tableau de board</h1>
-            </main>
+                <h1 className="title">Tableau de bord</h1>
 
+                {/* Select de filtrage */}
+                <div className="filtre-produit">
+                    <label htmlFor="filtre">Filtrer par produit: </label>
+                    <select
+                        id="filtre"
+                        value={selectedProduitId}
+                        onChange={(e) => setSelectedProduitId(e.target.value)}
+                    >
+                        <option value="">Tous les produits</option>
+                        {produits.map((p) => (
+                            <option key={p.id} value={p.id}>
+                                {p.nom}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="grille-tableaux">
+                    <div className="ligne-tableaux">
+                        <TableProduit selectedProduitId={selectedProduitId} />
+                        <TableCommande selectedProduitId={selectedProduitId} />
+                    </div>
+                    <div className="ligne-tableaux">
+                        <TableStock selectedProduitId={selectedProduitId} />
+
+                    </div>
+                </div>
+
+            </main>
+            <Footer/>
         </>
     );
-};
+}
 
 export default Statistiques;

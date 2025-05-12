@@ -19,10 +19,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/PageConnexion" />} />
           <Route path="/PageConnexion" element={<PageConnexion />} />
-          <Route path="/statistiques" element={<ProtectedRoute><Statistiques /></ProtectedRoute>} />
-          <Route path="/fournisseur" element={<ProtectedRoute><Fournisseur /></ProtectedRoute>} />
-          <Route path="/entrepot" element={<ProtectedRoute><Entrepot /></ProtectedRoute>} />
-          <Route path="/commande" element={<ProtectedRoute><CommandePage /></ProtectedRoute>} />
+          <Route path="/statistiques" element={<Statistiques />} />
+          <Route path="/fournisseur" element={<Fournisseur />} />
+          <Route path="/entrepot" element={<Entrepot />} />
+          <Route path="/commande" element={<CommandePage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
