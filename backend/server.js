@@ -1,6 +1,3 @@
-/* ------------------
-    Config
--------------------*/
 // config serveur
 const express = require('express');
 const mysql = require('mysql2');
@@ -38,35 +35,36 @@ app.get('/', (req, res) => {
 // --
 // Entrepôt
 // --
+//  Create---------------------------------------
 app.post('/entrepot/create', (req, res) => {
   const { nom, adresse, capacite } = req.body;
 
-  if (!nom || !adresse || capacite == null) {
-    return res.status(400).send("Nom, adresse et capacité sont requis");
+  if (!nom || !adresse || !capacite) {
+    return res.status(400).send("Le nom, l'adresse et la capacité de l'entrepôt sont obligatoires");
   }
 
   const query = 'INSERT INTO entrepot (nom, adresse, capacite) VALUES (?, ?, ?)';
 
-  db.query(query, [nom, adresse, capacite], (err) => {
+  db.query(query, [nom, adresse, capacite], (err, result) => {
     if (err) {
       return res.status(500).send('Problème MySQL C-Entrepôt');
     }
 
-    res.status(200).send("success");
+    res.status(200).json({ id: result.insertId, nom, adresse, capacite });
   });
 });
 
-
 // Read---------------------------------------
-app.get('/entrepot/read', (req, res) => {  // Correction: Ajouter req, res
-  const query = 'SELECT * FROM entrepot';
+app.get('/entrepot/read', (req, res) => {
+  const sortBy = req.query.sortBy || 'nom';
+  const query = `SELECT * FROM entrepot ORDER BY ${sortBy} ASC`;
 
   db.query(query, (err, results) => {
     if (err) {
       return res.status(500).send('Problème MySQL R-Entrepôt');
     }
 
-    res.status(200).json(results);
+    res.status(200).json(results); 
   });
 });
 
@@ -110,35 +108,35 @@ app.delete('/entrepot/delete/:id', (req, res) => {
 // --
 // Create---------------------------------------
 app.post('/fournisseur/create', (req, res) => {
-  const { nom, adresse } = req.body;
+  const { nom, adresse } = req.body;  // Utilise req.body
 
   if (!nom || !adresse) {
-    return res.status(400).send("Nom et adresse du fournisseur sont requis");
+    return res.status(400).send("Le nom et l'adresse du fournisseur sont obligatoires");
   }
 
   const query = 'INSERT INTO fournisseur (nom, adresse) VALUES (?, ?)';
 
-  db.query(query, [nom, adresse], (err) => {
+  db.query(query, [nom, adresse], (err, result) => {
     if (err) {
       return res.status(500).send('Problème MySQL C-Fournisseur');
     }
 
-    res.status(200).send("success");
+    res.status(200).json({ id: result.insertId, nom, adresse });
   });
 });
 
 // Read---------------------------------------
 app.get('/fournisseur/read', (req, res) => {
-  const query = 'SELECT * FROM fournisseur';
-
+  const sortBy = req.query.sortBy || 'nom';
+  const query = `SELECT * FROM fournisseur ORDER BY ${sortBy} ASC`;
+  
   db.query(query, (err, results) => {
     if (err) {
       return res.status(500).send('Problème MySQL R-Fournisseur');
     }
-
-    res.status(200).json(results);
+    res.status(200).json(results); 
   });
-});
+});  
 
 // Update---------------------------------------
 app.put('/fournisseur/update/:id', (req, res) => {
@@ -250,29 +248,36 @@ app.delete('/produit/delete/:id', (req, res) => {
 
 // Create---------------------------------------
 app.post('/commande/create', (req, res) => {
-  const { id_fournisseur, id_produit, quantite } = req.body;
+  const { id_fournisseur, id_entrepot, produits } = req.body;
 
-  if (!id_fournisseur || !id_produit || !quantite) {
-    return res.status(400).send("Tous les champs sont requis");
+  if (!id_fournisseur || !id_entrepot || !produits || !Array.isArray(produits)) {
+    return res.status(400).send("Champs manquants ou format invalide");
   }
 
-  const query = 'INSERT INTO commande (id_fournisseur, id_produit, quantite) VALUES (?, ?, ?)';
+  const insertCommande = 'INSERT INTO commande (id_fournisseur, id_entrepot, date_commande, status) VALUES (?, ?, NOW(), "en attente")';
 
-  db.query(query, [id_fournisseur, id_produit, quantite], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Commande');
-    }
+  db.query(insertCommande, [id_fournisseur, id_entrepot], (err, result) => {
+    if (err) return res.status(500).send("Erreur création commande");
 
-    res.status(200).send("success");
+    const id_commande = result.insertId;
+
+    const values = produits.map(p => [id_commande, p.id_produit, p.quantite]);
+    const insertProduits = 'INSERT INTO produit_commande (id_commande, id_produit, quantite) VALUES ?';
+
+    db.query(insertProduits, [values], (err2) => {
+      if (err2) return res.status(500).send("Erreur ajout produits");
+
+      res.status(200).send("Commande créée avec succès");
+    });
   });
 });
 
 // Read---------------------------------------
 app.get('/commande/read', (req, res) => {
-  const query = `
-    SELECT
+  const query =
+    `SELECT
       c.id,
-      c.id_produit,  
+      c.id_produit,
       f.nom AS fournisseur,
       p.nom AS produit,
       c.quantite,
@@ -280,8 +285,7 @@ app.get('/commande/read', (req, res) => {
     FROM commande c
            JOIN fournisseur f ON c.id_fournisseur = f.id
            JOIN produit p ON c.id_produit = p.id
-    ORDER BY c.date_commande DESC
-  `;
+    ORDER BY c.date_commande DESC`;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -291,6 +295,41 @@ app.get('/commande/read', (req, res) => {
     res.status(200).json(results);
   });
 });
+
+// Read2---------------------------------------
+app.get('/commande/read2', (req, res) => {
+  const query =
+    `SELECT c.id AS id_commande, f.nom AS fournisseur, e.nom AS entrepot, c.date_commande, c.status,
+           p.nom AS produit, pc.quantite
+    FROM commande c
+    JOIN fournisseur f ON c.id_fournisseur = f.id
+    JOIN entrepot e ON c.id_entrepot = e.id
+    JOIN produit_commande pc ON c.id = pc.id_commande
+    JOIN produit p ON pc.id_produit = p.id
+    ORDER BY c.date_commande DESC`;
+
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).send("Erreur lecture commande");
+
+    res.status(200).json(results);
+  });
+});
+
+// Delete---------------------------------------
+app.delete('/commande/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM commande WHERE id = ?';
+
+  db.query(query, [id], (err) => {
+    if (err) {
+      return res.status(500).send('Problème MySQL D-Commande');
+    }
+
+    res.status(200).send("success");
+  });
+});
+
 // --
 // Stock
 // --
@@ -303,10 +342,9 @@ app.post('/stock/create', (req, res) => {
     return res.status(400).send("Tous les champs sont requis");
   }
 
-  const query = `
-    INSERT INTO stock (id_entrepot, id_produit, quantite, valeur)
-    VALUES (?, ?, ?, ?)
-  `;
+  const query =
+    `INSERT INTO stock (id_entrepot, id_produit, quantite, valeur)
+    VALUES (?, ?, ?, ?)`;
 
   db.query(query, [id_entrepot, id_produit, quantite, valeur], (err) => {
     if (err) {
@@ -319,10 +357,10 @@ app.post('/stock/create', (req, res) => {
 
 // Read---------------------------------------
 app.get('/stock/read', (req, res) => {
-  const query = `
-    SELECT
+  const query =
+    `SELECT
       s.id,
-      s.id_produit,  
+      s.id_produit,
       e.nom AS entrepot,
       p.nom AS produit,
       s.quantite,
@@ -331,9 +369,7 @@ app.get('/stock/read', (req, res) => {
     FROM stock s
            JOIN entrepot e ON s.id_entrepot = e.id
            JOIN produit p ON s.id_produit = p.id
-    ORDER BY s.date_maj DESC;
-
-  `;
+    ORDER BY s.date_maj DESC`;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -353,10 +389,9 @@ app.put('/stock/update/:id', (req, res) => {
     return res.status(400).send("Quantité et valeur sont requis");
   }
 
-  const query = `
-    UPDATE stock SET quantite = ?, valeur = ?, date_maj = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `;
+  const query =
+    `UPDATE stock SET quantite = ?, valeur = ?, date_maj = CURRENT_TIMESTAMP
+    WHERE id = ?`;
 
   db.query(query, [quantite, valeur, id], (err) => {
     if (err) {
@@ -381,6 +416,7 @@ app.delete('/stock/delete/:id', (req, res) => {
     res.status(200).send("success");
   });
 });
+
 // --
 // Fournisseur_Produit
 // --
@@ -393,10 +429,9 @@ app.post('/fournisseur-produit/create', (req, res) => {
     return res.status(400).send("ID fournisseur et ID produit sont requis");
   }
 
-  const query = `
-    INSERT INTO fournisseur_produit (id_fournisseur, id_produit)
-    VALUES (?, ?)
-  `;
+  const query =
+    `INSERT INTO fournisseur_produit (id_fournisseur, id_produit)
+    VALUES (?, ?)`;
 
   db.query(query, [id_fournisseur, id_produit], (err) => {
     if (err) {
@@ -409,13 +444,12 @@ app.post('/fournisseur-produit/create', (req, res) => {
 
 // Read (lister tous les liens)------------------------
 app.get('/fournisseur-produit/read', (req, res) => {
-  const query = `
-    SELECT f.nom AS fournisseur, p.nom AS produit
+  const query =
+    `SELECT f.nom AS fournisseur, p.nom AS produit
     FROM fournisseur_produit fp
            JOIN fournisseur f ON fp.id_fournisseur = f.id
            JOIN produit p ON fp.id_produit = p.id
-    ORDER BY f.nom
-  `;
+    ORDER BY f.nom`;
 
   db.query(query, (err, results) => {
     if (err) {
@@ -434,10 +468,9 @@ app.delete('/fournisseur-produit/delete', (req, res) => {
     return res.status(400).send("ID fournisseur et ID produit sont requis");
   }
 
-  const query = `
-    DELETE FROM fournisseur_produit
-    WHERE id_fournisseur = ? AND id_produit = ?
-  `;
+  const query =
+    `DELETE FROM fournisseur_produit
+    WHERE id_fournisseur = ? AND id_produit = ?`;
 
   db.query(query, [id_fournisseur, id_produit], (err) => {
     if (err) {
@@ -447,7 +480,6 @@ app.delete('/fournisseur-produit/delete', (req, res) => {
     res.status(200).send("success");
   });
 });
-
 
 /* ------------------
     Express

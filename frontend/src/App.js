@@ -4,6 +4,7 @@ import Statistiques from "./pages/statistique_page";
 import Fournisseur from "./pages/fournisseur_page";
 import Entrepot from "./pages/entrepot_page";
 import CommandePage from "./pages/commande_page";
+import ProduitPage from "./pages/produit";
 
 import { AuthProvider, useAuthContext } from "./pages/AuthProvider";
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/fournisseur" element={<Fournisseur />} />
           <Route path="/entrepot" element={<Entrepot />} />
           <Route path="/commande" element={<CommandePage />} />
+          <Route path="/produit" element={<ProduitPage/>}/>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

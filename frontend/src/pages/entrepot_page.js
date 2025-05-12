@@ -3,6 +3,8 @@ import { useAuth } from "../services/firebaseconnect";
 import "../styles/entrepot.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 function Entrepot() {
     const { handleLogout } = useAuth();
@@ -80,16 +82,7 @@ function Entrepot() {
 
     return (
         <div>
-            <nav className="nav-entrepot">
-                <div className="liste-pages">
-                    <img src="logo192.png" alt="logo entreprise" className="image_entreprise" />
-                    <Link to="/statistiques" className="lien">Statistiques</Link>
-                    <Link to="/fournisseur" className="lien">Fournisseur</Link>
-                    <Link to="/entrepot" className="lien">Entrepôt</Link>
-                    <Link to="/commande" className="lien">Commande</Link>
-                </div>
-                <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>
-            </nav>
+            <Navbar/>
 
             <main className="entrepot">
                 <h1 className="title">Liste des entrepôts</h1>
@@ -147,6 +140,7 @@ function Entrepot() {
                     )}
                 </div>
             </main>
+            <Footer/>
         </div>
     );
 }

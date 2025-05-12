@@ -3,6 +3,8 @@ import { useAuth } from "../services/firebaseconnect";
 import "../styles/fournisseur.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 function Fournisseur() {
     const { handleLogout } = useAuth();
@@ -72,16 +74,7 @@ function Fournisseur() {
 
     return (
         <div>
-            <nav className="nav-statistique">
-                <div className="liste-pages">
-                    <img src="logo192.png" alt="logo entreprise" className="image_entreprise" />
-                    <Link to="/statistiques" className="lien">Statistiques</Link>
-                    <Link to="/fournisseur" className="lien">Fournisseur</Link>
-                    <Link to="/entrepot" className="lien">Entrepôt</Link>
-                    <Link to="/commande" className="lien">Commande</Link>
-                </div>
-                <button onClick={handleLogout} className="button-deconnexion">Se déconnecter</button>
-            </nav>
+            <Navbar/>
 
             <main className="fournisseur">
                 <h1 className="title">Liste des fournisseurs</h1>
@@ -134,6 +127,7 @@ function Fournisseur() {
                     )}
                 </div>
             </main>
+            <Footer/>
         </div>
     );
 }
