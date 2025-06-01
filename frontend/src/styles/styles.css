@@ -102,7 +102,6 @@ input:focus, select:focus {
 .button-enregistrer, .toggle-view-btn {
     padding: 8px 16px;
     font-size: 14px;
-    margin-top: 10px;
     cursor: pointer;
     background-color: #4CAF50;
     color: white;
@@ -197,7 +196,7 @@ input:focus, select:focus {
 
 .grille-tableaux {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 2rem;
     margin-top: 2rem;
 }
@@ -206,14 +205,19 @@ input:focus, select:focus {
     display: flex;
     flex-direction: row;
     gap: 2rem;
-    flex-wrap: wrap;
+    /*flex-wrap: wrap;*/
     justify-content: space-between;
 }
 
 .ligne-tableaux > * {
     min-width: 40%;
+    padding: 2%;
+    width: 100%;
+    border:  3px solid #000000;
 }
-
+.titre_stock{
+   margin: 1%;
+}
 .container_titre_stock {
     display: flex;
     align-items: center;
@@ -227,12 +231,17 @@ input:focus, select:focus {
     gap: 10px;
 }
 
-.filtre-periode {
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 2%;
+.chart-btn {
+    background-color: #BFE0F7;
+    padding: 1%;
+    border: none;
+    border-radius: 5px;
+}
+.chart-type-toggle-btn{
+    background-color: #FF4747;
+    padding: 1%;
+    border: none;
+    border-radius: 5px;
 }
 
 .periode-select {
@@ -250,7 +259,7 @@ input:focus, select:focus {
 
 .container_titre_filtre {
     display: flex;
-    gap: 30px;
+    align-items: center;
 }
 
 /* --- SWITCH inscription/connexion --- */

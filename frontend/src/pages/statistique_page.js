@@ -53,7 +53,6 @@ function Statistiques() {
                     </div>
                     <div className="ligne-tableaux">
                         <TableStock selectedProduitId={selectedProduitId} />
-
                     </div>
                 </div>
 

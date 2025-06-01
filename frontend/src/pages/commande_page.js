@@ -5,73 +5,66 @@ import Footer from "../components/Footer";
 import axios from "axios";
 
 function CommandePage() {
-    const [commandes, setCommandes] = useState([]); // order List
-    const [groupedCommandes, setGroupedCommandes] = useState({}); // GroupBy ID
+    const [commandes, setCommandes] = useState([]);
+    const [groupedCommandes, setGroupedCommandes] = useState({});
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // Fetch error
+    const [error, setError] = useState(null);
 
-    const [formData, setFormData] = useState({ // Form struct
+    const [formData, setFormData] = useState({
         fournisseur_id: "",
         entrepot_id: "",
         produit_id: "",
         quantite: "",
-        status: "en attente" // Default status
+        status: "en attente"
     });
 
     const [fournisseurs, setFournisseurs] = useState([]);
     const [entrepots, setEntrepots] = useState([]);
     const [produits, setProduits] = useState([]);
 
-    // ---------------------------
-    // Form inputs
-    // ---------------------------
-    // get order
+    // --- Fetch functions ---
     const fetchCommandes = () => {
         setLoading(true);
         axios.get("http://localhost:3100/commande/read2")
-            .then((res) => {
+            .then(res => {
                 setCommandes(res.data);
                 setLoading(false);
             })
-            .catch(() => {
-                setError("Erreur commandes.");
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur lors de la récupération des commandes.");
                 setLoading(false);
             });
     };
 
-    // get providers
     const fetchFournisseurs = () => {
         axios.get("http://localhost:3100/fournisseur/read")
-            .then(res => {
-                console.log("Fournisseurs reçus :", res.data);
-                setFournisseurs(res.data);
-            })
-            .catch(() => setError("Erreur fournisseurs."));
+            .then(res => setFournisseurs(res.data))
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur lors de la récupération des fournisseurs.");
+            });
     };
 
-    // get warehouse
     const fetchEntrepots = () => {
         axios.get("http://localhost:3100/entrepot/read")
-            .then(res => {
-                console.log("Entrepôts reçus :", res.data);
-                setEntrepots(res.data);
-            })
-            .catch(() => setError("Erreur entrepôts."));
+            .then(res => setEntrepots(res.data))
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur lors de la récupération des entrepôts.");
+            });
     };
 
-    // get product
     const fetchProduits = () => {
         axios.get("http://localhost:3100/produit/read")
-            .then(res => {
-                console.log("Produits reçus :", res.data);
-                setProduits(res.data);
-            })
-            .catch(() => setError("Erreur produits."));
+            .then(res => setProduits(res.data))
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur lors de la récupération des produits.");
+            });
     };
 
-    // ---------------------------
-    // Dynamic management
-    // ---------------------------
+    // --- Load all at mount ---
     useEffect(() => {
         fetchCommandes();
         fetchFournisseurs();
@@ -79,158 +72,174 @@ function CommandePage() {
         fetchProduits();
     }, []);
 
+    // --- Regroup commandes (basé sur structure correcte de /read2) ---
     useEffect(() => {
         const grouped = {};
+
         commandes.forEach(c => {
-            if (!grouped[c.id_commande]) {
-                grouped[c.id_commande] = {
-                    fournisseur: c.fournisseur,
-                    entrepot: c.entrepot,
-                    date_commande: c.date_commande,
-                    status: c.status,
-                    produits: []
-                };
-            }
-            grouped[c.id_commande].produits.push({
-                nom: c.produit,
-                quantite: c.quantite
-            });
+            grouped[c.id] = {
+                fournisseur: c.fournisseur,
+                entrepot: c.entrepot,
+                date_commande: c.date_commande,
+                status: c.status,
+                produits: c.produits.map(p => ({
+                    id: p.id,
+                    nom: p.nom,
+                    quantite: p.ProduitCommande?.quantite ?? "N/A"
+                }))
+            };
         });
+
         setGroupedCommandes(grouped);
     }, [commandes]);
 
-    // New order
     const createCommande = () => {
-        if (!formData.fournisseur_id || !formData.entrepot_id || !formData.produit_id || !formData.quantite) {
+        const { fournisseur_id, entrepot_id, produit_id, quantite, status } = formData;
+
+        if (!fournisseur_id || !entrepot_id || !produit_id || !quantite) {
             alert("Tous les champs sont requis.");
             return;
         }
 
-        // Prepare payload
         const commandeData = {
-            id_fournisseur: formData.fournisseur_id,
-            id_entrepot: formData.entrepot_id,
+            id_fournisseur: fournisseur_id,
+            id_entrepot: entrepot_id,
             produits: [{
-                id_produit: formData.produit_id,
-                quantite: parseInt(formData.quantite)
+                id_produit: produit_id,
+                quantite: parseInt(quantite, 10)
             }],
-            status: formData.status
+            status
         };
 
         axios.post("http://localhost:3100/commande/create", commandeData)
             .then(() => {
-                setFormData({ fournisseur_id: "", entrepot_id: "", produit_id: "", quantite: "", status: "en attente" });
+                setFormData({
+                    fournisseur_id: "",
+                    entrepot_id: "",
+                    produit_id: "",
+                    quantite: "",
+                    status: "en attente"
+                });
                 fetchCommandes();
             })
-            .catch(() => setError("Erreur commande."));
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur lors de la création de la commande.");
+            });
     };
 
-    // Update order status
     const updateCommandeStatus = (id, status) => {
         axios.put(`http://localhost:3100/commande/update-status/${id}`, { status })
-            .then(() => {
-                fetchCommandes();
-            })
-            .catch(() => setError("Erreur mise à jour statut."));
+            .then(() => fetchCommandes())
+            .catch((err) => {
+                console.error(err);
+                setError("Erreur mise à jour du statut.");
+            });
     };
 
     return (
         <div>
-            <Navbar/>
+            <Navbar />
             <main className="entrepot">
                 <h1 className="title">Créer une commande</h1>
-                {/* ---------------------------
-                    Form
-                --------------------------- */}
+
                 <div className="formulaire">
-                    {/* Provider */}
                     <select value={formData.fournisseur_id}
-                        onChange={(e) => setFormData({ ...formData, fournisseur_id: e.target.value })}>
+                            onChange={(e) => setFormData({ ...formData, fournisseur_id: e.target.value })}>
                         <option value="">-- Choisir un fournisseur --</option>
-                        {fournisseurs.map((f) => (
+                        {fournisseurs.map(f => (
                             <option key={f.id} value={f.id}>
-                                {(f.nom || "Nom inconnu")} ({f.id})
+                                {f.nom || "Nom inconnu"} ({f.id})
                             </option>
                         ))}
                     </select>
-                    {/* wareHouse */}
+
                     <select value={formData.entrepot_id}
-                        onChange={(e) => setFormData({ ...formData, entrepot_id: e.target.value })}>
+                            onChange={(e) => setFormData({ ...formData, entrepot_id: e.target.value })}>
                         <option value="">-- Choisir un entrepôt --</option>
-                        {entrepots.map((e) => (
-                            <option key={e.id} value={e.id}>
-                                {(e.nom || "Nom inconnu")} ({e.id})
+                        {entrepots.map(ent => (
+                            <option key={ent.id} value={ent.id}>
+                                {ent.nom || "Nom inconnu"} ({ent.id})
                             </option>
                         ))}
                     </select>
-                    {/* Product */}
+
                     <select value={formData.produit_id}
-                        onChange={(e) => setFormData({ ...formData, produit_id: e.target.value })}>
+                            onChange={(e) => setFormData({ ...formData, produit_id: e.target.value })}>
                         <option value="">-- Choisir un produit --</option>
-                        {produits.map((p) => (
+                        {produits.map(p => (
                             <option key={p.id} value={p.id}>
-                                {(p.nom || "Nom inconnu")} ({p.id})
+                                {p.nom || "Nom inconnu"} ({p.id})
                             </option>
                         ))}
                     </select>
-                    {/* Quantities */}
-                    <input type="number" placeholder="Quantité" value={formData.quantite}
-                        onChange={(e) => setFormData({ ...formData, quantite: e.target.value })} />
-                    {/* Status */}
+
+                    <input type="number" placeholder="Quantité" min="1" value={formData.quantite}
+                           onChange={(e) => setFormData({ ...formData, quantite: e.target.value })} />
+
                     <select value={formData.status}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
                         <option value="en attente">En attente</option>
                         <option value="annulée">Annulée</option>
                         <option value="en retard">En retard</option>
                         <option value="reçue">Reçue</option>
                     </select>
+
                     <button onClick={createCommande} className="button-enregistrer">Ajouter une commande</button>
                 </div>
 
-                {/* ---------------------------
-                    Display order list
-                --------------------------- */}
                 <h1 className="title">Liste détaillée des commandes</h1>
                 {loading ? (
                     <p>Chargement...</p>
                 ) : error ? (
                     <p className="error">{error}</p>
                 ) : (
-                    Object.entries(groupedCommandes).map(([id, data]) => (
-                        <div key={id} className="commande-card">
-                            <h3>Commande #{id}</h3>
-                            <p><strong>Fournisseur:</strong> {data.fournisseur}</p>
-                            <p><strong>Entrepôt:</strong> {data.entrepot}</p>
-                            <p><strong>Date:</strong> {new Date(data.date_commande).toLocaleDateString()}</p>
-                            <p><strong>Status:</strong>
-                                <select value={data.status} onChange={(e) => updateCommandeStatus(id, e.target.value)}>
-                                    <option value="en attente">En attente</option>
-                                    <option value="annulée">Annulée</option>
-                                    <option value="en retard">En retard</option>
-                                    <option value="reçue">Reçue</option>
-                                </select>
-                            </p>
-                            <table className="table_entrepot">
-                                <thead>
-                                    <tr>
-                                        <th>Produit</th>
-                                        <th>Quantité</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.produits.map((prod, i) => (
-                                        <tr key={i}>
-                                            <td>{prod.nom}</td>
-                                            <td>{prod.quantite}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ))
+                    <table className="table_entrepot">
+                        <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Fournisseur</th>
+                            <th>Entrepôt</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Produit</th>
+                            <th>Quantité</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {Object.entries(groupedCommandes).map(([id, data]) => {
+                            const produitsCount = data.produits.length;
+                            return data.produits.map((prod, index) => (
+                                <tr key={`${id}-${prod.id}`}>
+                                    {index === 0 && (
+                                        <>
+                                            <td rowSpan={produitsCount}>{id}</td>
+                                            <td rowSpan={produitsCount}>{data.fournisseur?.nom || "Nom inconnu"}</td>
+                                            <td rowSpan={produitsCount}>{data.entrepot?.nom || "Nom inconnu"}</td>
+                                            <td rowSpan={produitsCount}>{new Date(data.date_commande).toLocaleDateString()}</td>
+                                            <td rowSpan={produitsCount}>
+                                                <select
+                                                    value={data.status}
+                                                    onChange={(e) => updateCommandeStatus(id, e.target.value)}
+                                                >
+                                                    <option value="en attente">En attente</option>
+                                                    <option value="annulée">Annulée</option>
+                                                    <option value="en retard">En retard</option>
+                                                    <option value="reçue">Reçue</option>
+                                                </select>
+                                            </td>
+                                        </>
+                                    )}
+                                    <td>{prod.nom}</td>
+                                    <td>{prod.quantite}</td>
+                                </tr>
+                            ));
+                        })}
+                        </tbody>
+                    </table>
                 )}
             </main>
-            <Footer/>
+            <Footer />
         </div>
     );
 }

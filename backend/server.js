@@ -1,510 +1,421 @@
-// config serveur
 const express = require('express');
-const mysql = require('mysql2');
 const cors = require('cors');
 const app = express();
 app.use(cors());
-const port = 3100;
-
-// config MySQL
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'tech',
-  password: 'App2025',
-  database: 'filrouge'
-});
-
-// liaison Express - MySQL
-db.connect((err) => {
-  if (err) {
-    console.error('Connexion MySQL ', err);
-    return;
-  }
-});
-
 app.use(express.json());
 
-/* ------------------
-    Routes
--------------------*/
-// Route par défaut
+const port = 3100;
+const sequelize = require('./config/database');
+const {
+  Entrepot,
+  Fournisseur,
+  Produit,
+  Commande,
+  ProduitCommande,
+  Stock,
+  FournisseurProduit
+} = require('./models');
+
+// Test connexion Sequelize
+sequelize.authenticate()
+    .then(() => console.log('Connexion Sequelize OK'))
+    .catch((err) => console.error('Erreur Sequelize :', err));
+
+// Routes
 app.get('/', (req, res) => {
-  res.status(200).send('Liaison MySQL active');
+  res.status(200).send('API Sequelize prête');
 });
 
-// --
-// Entrepôt
-// --
-//  Create---------------------------------------
-app.post('/entrepot/create', (req, res) => {
-  const { nom, adresse, capacite } = req.body;
-
-  if (!nom || !adresse || !capacite) {
-    return res.status(400).send("Le nom, l'adresse et la capacité de l'entrepôt sont obligatoires");
+/* ---------- ENTREPOT ---------- */
+app.post('/entrepot/create', async (req, res) => {
+  try {
+    const entrepot = await Entrepot.create(req.body);
+    res.status(201).json(entrepot);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Entrepôt");
   }
-
-  const query = 'INSERT INTO entrepot (nom, adresse, capacite) VALUES (?, ?, ?)';
-
-  db.query(query, [nom, adresse, capacite], (err, result) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Entrepôt');
-    }
-
-    res.status(200).json({ id: result.insertId, nom, adresse, capacite });
-  });
 });
 
-// Read---------------------------------------
-app.get('/entrepot/read', (req, res) => {
-  const sortBy = req.query.sortBy || 'nom';
-  const query = `SELECT * FROM entrepot ORDER BY ${sortBy} ASC`;
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Entrepôt');
-    }
-
-    res.status(200).json(results); 
-  });
-});
-
-// Update---------------------------------------
-app.put('/entrepot/update/:id', (req, res) => {
-  const { id } = req.params;
-  const { nom, adresse, capacite } = req.body;
-
-  if (!nom || !adresse || !capacite) {
-    return res.status(400).send('Tous les champs sont requis');
+app.get('/entrepot/read', async (req, res) => {
+  try {
+    const entrepots = await Entrepot.findAll({ order: [['nom', 'ASC']] });
+    res.status(200).json(entrepots);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Entrepôt");
   }
-
-  const query = 'UPDATE entrepot SET nom = ?, adresse = ?, capacite = ? WHERE id = ?';
-
-  db.query(query, [nom, adresse, capacite, id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL U-Entrepôt');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Delete---------------------------------------
-app.delete('/entrepot/delete/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM entrepot WHERE id = ?';
-
-  db.query(query, [id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Entrepôt');
-    }
-
+app.put('/entrepot/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Entrepot.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).send("Entrepôt non trouvé");
     res.status(200).send("success");
-  });
-});
-
-// --
-// Fournisseur
-// --
-// Create---------------------------------------
-app.post('/fournisseur/create', (req, res) => {
-  const { nom, adresse } = req.body;  // Utilise req.body
-
-  if (!nom || !adresse) {
-    return res.status(400).send("Le nom et l'adresse du fournisseur sont obligatoires");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Entrepôt");
   }
-
-  const query = 'INSERT INTO fournisseur (nom, adresse) VALUES (?, ?)';
-
-  db.query(query, [nom, adresse], (err, result) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Fournisseur');
-    }
-
-    res.status(200).json({ id: result.insertId, nom, adresse });
-  });
 });
 
-// Read---------------------------------------
-app.get('/fournisseur/read', (req, res) => {
-  const sortBy = req.query.sortBy || 'nom';
-  const query = `SELECT * FROM fournisseur ORDER BY ${sortBy} ASC`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Fournisseur');
-    }
-    res.status(200).json(results); 
-  });
-});  
-
-// Update---------------------------------------
-app.put('/fournisseur/update/:id', (req, res) => {
-  const { id } = req.params;
-  const { nom, adresse } = req.body;
-
-  if (!nom || !adresse) {
-    return res.status(400).send('Tous les champs sont requis');
+app.delete('/entrepot/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Entrepot.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Entrepôt non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Entrepôt");
   }
-
-  const query = 'UPDATE fournisseur SET nom = ?, adresse = ? WHERE id = ?';
-
-  db.query(query, [nom, adresse, id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL U-Fournisseur');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Delete---------------------------------------
-app.delete('/fournisseur/delete/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM fournisseur WHERE id = ?';
-
-  db.query(query, [id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Fournisseur');
-    }
-
-    res.status(200).send("success");
-  });
-});
-// --
-// Produit
-// --
-
-// Create---------------------------------------
-app.post('/produit/create', (req, res) => {
-  const { nom, prix } = req.body;
-
-  if (!nom || prix == null) {
-    return res.status(400).send("Le nom et le prix du produit sont obligatoires");
+/* ---------- FOURNISSEUR ---------- */
+app.post('/fournisseur/create', async (req, res) => {
+  try {
+    const fournisseur = await Fournisseur.create(req.body);
+    res.status(201).json(fournisseur);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Fournisseur");
   }
-
-  const query = 'INSERT INTO produit (nom, prix) VALUES (?, ?)';
-
-  db.query(query, [nom, prix], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Produit');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Read---------------------------------------
-app.get('/produit/read', (req, res) => {
-  const query = 'SELECT * FROM produit';
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Produit');
-    }
-
-    res.status(200).json(results);
-  });
-});
-
-// Update---------------------------------------
-app.put('/produit/update/:id', (req, res) => {
-  const { id } = req.params;
-  const { nom, prix } = req.body;
-
-  if (!nom || prix == null) {
-    return res.status(400).send('Tous les champs sont requis');
+app.get('/fournisseur/read', async (req, res) => {
+  try {
+    const fournisseurs = await Fournisseur.findAll({ order: [['nom', 'ASC']] });
+    res.status(200).json(fournisseurs);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Fournisseur");
   }
-
-  const query = 'UPDATE produit SET nom = ?, prix = ? WHERE id = ?';
-
-  db.query(query, [nom, prix, id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL U-Produit');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Delete---------------------------------------
-app.delete('/produit/delete/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM produit WHERE id = ?';
-
-  db.query(query, [id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Produit');
-    }
-
+app.put('/fournisseur/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Fournisseur.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).send("Fournisseur non trouvé");
     res.status(200).send("success");
-  });
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Fournisseur");
+  }
 });
-// --
-// Commande
-// --
 
-// Create---------------------------------------
-app.post('/commande/create', (req, res) => {
+app.delete('/fournisseur/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Fournisseur.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Fournisseur non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Fournisseur");
+  }
+});
+
+/* ---------- PRODUIT ---------- */
+app.post('/produit/create', async (req, res) => {
+  try {
+    const produit = await Produit.create(req.body);
+    res.status(201).json(produit);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Produit");
+  }
+});
+
+app.get('/produit/read', async (req, res) => {
+  try {
+    const produits = await Produit.findAll({ order: [['nom', 'ASC']] });
+    res.status(200).json(produits);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Produit");
+  }
+});
+
+app.put('/produit/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Produit.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).send("Produit non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Produit");
+  }
+});
+
+app.delete('/produit/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Produit.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Produit non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Produit");
+  }
+});
+
+/* ---------- STOCK ---------- */
+app.post('/stock/create', async (req, res) => {
+  try {
+    const stock = await Stock.create(req.body);
+    res.status(201).json(stock);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Stock");
+  }
+});
+
+app.get('/stock/read', async (req, res) => {
+  try {
+    const stocks = await Stock.findAll({
+      include: ['entrepot', 'produit'],
+      order: [['date_maj', 'DESC']]
+    });
+    res.status(200).json(stocks);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Stock");
+  }
+});
+
+app.put('/stock/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Stock.update(
+        { ...req.body, date_maj: new Date() },
+        { where: { id: req.params.id } }
+    );
+    if (!updated) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Stock");
+  }
+});
+
+app.delete('/stock/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Stock.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Stock");
+  }
+});
+
+/* ---------- FOURNISSEUR_PRODUIT ---------- */
+app.post('/fournisseur-produit/create', async (req, res) => {
+  try {
+    const link = await FournisseurProduit.create(req.body);
+    res.status(201).json(link);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Fournisseur_Produit");
+  }
+});
+
+app.get('/fournisseur-produit/read', async (req, res) => {
+  try {
+    const links = await FournisseurProduit.findAll({
+      include: ['fournisseur', 'produit']
+    });
+    res.status(200).json(links);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Fournisseur_Produit");
+  }
+});
+
+app.delete('/fournisseur-produit/delete', async (req, res) => {
+  try {
+    const { id_fournisseur, id_produit } = req.body;
+    const deleted = await FournisseurProduit.destroy({ where: { id_fournisseur, id_produit } });
+    if (!deleted) return res.status(404).send("Lien non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Fournisseur_Produit");
+  }
+});
+
+/* ---------- COMMANDE + PRODUIT_COMMANDE ---------- */
+app.post('/commande/create', async (req, res) => {
   const { id_fournisseur, id_entrepot, produits } = req.body;
 
   if (!id_fournisseur || !id_entrepot || !produits || !Array.isArray(produits)) {
     return res.status(400).send("Champs manquants ou format invalide");
   }
 
-  const insertCommande = 'INSERT INTO commande (id_fournisseur, id_entrepot, date_commande, status) VALUES (?, ?, NOW(), "en attente")';
-
-  db.query(insertCommande, [id_fournisseur, id_entrepot], (err, result) => {
-    if (err) return res.status(500).send("Erreur création commande");
-
-    const id_commande = result.insertId;
-
-    const values = produits.map(p => [id_commande, p.id_produit, p.quantite]);
-    const insertProduits = 'INSERT INTO produit_commande (id_commande, id_produit, quantite) VALUES ?';
-
-    db.query(insertProduits, [values], (err2) => {
-      if (err2) return res.status(500).send("Erreur ajout produits");
-
-      res.status(200).send("Commande créée avec succès");
+  try {
+    const commande = await Commande.create({
+      id_fournisseur,
+      id_entrepot,
+      date_commande: new Date(),
+      status: 'en attente'
     });
-  });
-});
 
-// Read---------------------------------------
-app.get('/commande/read', (req, res) => {
-  const query =
-    `SELECT
-      c.id,
-      c.id_produit,
-      f.nom AS fournisseur,
-      p.nom AS produit,
-      c.quantite,
-      c.date_commande
-    FROM commande c
-           JOIN fournisseur f ON c.id_fournisseur = f.id
-           JOIN produit p ON c.id_produit = p.id
-    ORDER BY c.date_commande DESC`;
+    const pcData = produits.map(p => ({
+      id_commande: commande.id,
+      id_produit: p.id_produit,
+      quantite: p.quantite
+    }));
 
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Commande');
-    }
+    await ProduitCommande.bulkCreate(pcData);
 
-    res.status(200).json(results);
-  });
-});
-
-// Read2---------------------------------------
-app.get('/commande/read2', (req, res) => {
-  const query =
-    `SELECT c.id AS id_commande, f.nom AS fournisseur, e.nom AS entrepot, c.date_commande, c.status,
-           p.nom AS produit, pc.quantite
-    FROM commande c
-    JOIN fournisseur f ON c.id_fournisseur = f.id
-    JOIN entrepot e ON c.id_entrepot = e.id
-    JOIN produit_commande pc ON c.id = pc.id_commande
-    JOIN produit p ON pc.id_produit = p.id
-    ORDER BY c.date_commande DESC`;
-
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).send("Erreur lecture commande");
-
-    res.status(200).json(results);
-  });
-});
-
-// Update order status
-app.put('/commande/update-status/:id', (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  if (!status) {
-    return res.status(400).send("Statut requis");
+    res.status(201).send("Commande créée avec succès");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur Sequelize C-Commande");
   }
-
-  const query = 'UPDATE commande SET status = ? WHERE id = ?';
-
-  db.query(query, [status, id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL U-Commande');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Delete---------------------------------------
-app.delete('/commande/delete/:id', (req, res) => {
-  const { id } = req.params;
+app.get('/commande/read2', async (req, res) => {
+  try {
+    const commandes = await Commande.findAll({
+      include: [
+        {
+          model: Fournisseur,
+          as: 'fournisseur', // alias bien défini dans les associations
+        },
+        {
+          model: Entrepot,
+          as: 'entrepot', // alias correct dans index.js
+        },
+        {
+          model: Produit,
+          as: 'produits', // Many-to-Many avec alias 'produits'
+          through: {
+            attributes: ['quantite'], // récupère la quantité depuis ProduitCommande
+          },
+        }
+      ],
+      order: [['date_commande', 'DESC']]
+    });
 
-  const query = 'DELETE FROM commande WHERE id = ?';
-
-  db.query(query, [id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Commande');
-    }
-
-    res.status(200).send("success");
-  });
-});
-
-// --
-// Stock
-// --
-
-// Create---------------------------------------
-app.post('/stock/create', (req, res) => {
-  const { id_entrepot, id_produit, quantite, valeur } = req.body;
-
-  if (!id_entrepot || !id_produit || quantite == null || valeur == null) {
-    return res.status(400).send("Tous les champs sont requis");
+    res.status(200).json(commandes);
+  } catch (err) {
+    console.error("❌ Erreur dans /commande/read2 :", err);
+    res.status(500).send("Erreur Sequelize R-Commande");
   }
+});
 
-  const query =
-    `INSERT INTO stock (id_entrepot, id_produit, quantite, valeur)
-    VALUES (?, ?, ?, ?)`;
 
-  db.query(query, [id_entrepot, id_produit, quantite, valeur], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Stock');
-    }
 
+
+
+
+app.put('/commande/update-status/:id', async (req, res) => {
+  try {
+    const [updated] = await Commande.update({ status: req.body.status }, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).send("Commande non trouvée");
     res.status(200).send("success");
-  });
-});
-
-// Read---------------------------------------
-app.get('/stock/read', (req, res) => {
-  const query =
-    `SELECT
-      s.id,
-      s.id_produit,
-      e.nom AS entrepot,
-      p.nom AS produit,
-      s.quantite,
-      s.valeur,
-      s.date_maj
-    FROM stock s
-           JOIN entrepot e ON s.id_entrepot = e.id
-           JOIN produit p ON s.id_produit = p.id
-    ORDER BY s.date_maj DESC`;
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Stock');
-    }
-
-    res.status(200).json(results);
-  });
-});
-
-// Update---------------------------------------
-app.put('/stock/update/:id', (req, res) => {
-  const { id } = req.params;
-  const { quantite, valeur } = req.body;
-
-  if (quantite == null || valeur == null) {
-    return res.status(400).send("Quantité et valeur sont requis");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Commande");
   }
-
-  const query =
-    `UPDATE stock SET quantite = ?, valeur = ?, date_maj = CURRENT_TIMESTAMP
-    WHERE id = ?`;
-
-  db.query(query, [quantite, valeur, id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL U-Stock');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-// Delete---------------------------------------
-app.delete('/stock/delete/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM stock WHERE id = ?';
-
-  db.query(query, [id], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Stock');
-    }
-
+app.delete('/commande/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Commande.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Commande non trouvée");
     res.status(200).send("success");
-  });
-});
-
-// --
-// Fournisseur_Produit
-// --
-
-// Create (lier un produit à un fournisseur)------------------------
-app.post('/fournisseur-produit/create', (req, res) => {
-  const { id_fournisseur, id_produit } = req.body;
-
-  if (!id_fournisseur || !id_produit) {
-    return res.status(400).send("ID fournisseur et ID produit sont requis");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Commande");
   }
-
-  const query =
-    `INSERT INTO fournisseur_produit (id_fournisseur, id_produit)
-    VALUES (?, ?)`;
-
-  db.query(query, [id_fournisseur, id_produit], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL C-Fournisseur_Produit');
-    }
-
-    res.status(200).send("success");
-  });
 });
-
-// Read (lister tous les liens)------------------------
-app.get('/fournisseur-produit/read', (req, res) => {
-  const query =
-    `SELECT f.nom AS fournisseur, p.nom AS produit
-    FROM fournisseur_produit fp
-           JOIN fournisseur f ON fp.id_fournisseur = f.id
-           JOIN produit p ON fp.id_produit = p.id
-    ORDER BY f.nom`;
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL R-Fournisseur_Produit');
-    }
-
-    res.status(200).json(results);
-  });
-});
-
-// Delete (supprimer un lien spécifique)------------------------
-app.delete('/fournisseur-produit/delete', (req, res) => {
-  const { id_fournisseur, id_produit } = req.body;
-
-  if (!id_fournisseur || !id_produit) {
-    return res.status(400).send("ID fournisseur et ID produit sont requis");
+/* ---------- FOURNISSEUR ---------- */
+app.post('/fournisseur/create', async (req, res) => {
+  try {
+    const fournisseur = await Fournisseur.create(req.body);
+    res.status(201).json(fournisseur);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Fournisseur");
   }
-
-  const query =
-    `DELETE FROM fournisseur_produit
-    WHERE id_fournisseur = ? AND id_produit = ?`;
-
-  db.query(query, [id_fournisseur, id_produit], (err) => {
-    if (err) {
-      return res.status(500).send('Problème MySQL D-Fournisseur_Produit');
-    }
-
-    res.status(200).send("success");
-  });
 });
 
-/* ------------------
-    Express
--------------------*/
-// Lancer le serveur Express
+app.get('/fournisseur/read', async (req, res) => {
+  try {
+    const fournisseurs = await Fournisseur.findAll({ order: [['nom', 'ASC']] });
+    res.status(200).json(fournisseurs);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize R-Fournisseur");
+  }
+});
+
+app.put('/fournisseur/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Fournisseur.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).send("Fournisseur non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Fournisseur");
+  }
+});
+
+app.delete('/fournisseur/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Fournisseur.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Fournisseur non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Fournisseur");
+  }
+});
+/* ---------- STOCK ---------- */
+app.post('/stock/create', async (req, res) => {
+  try {
+    const stock = await Stock.create(req.body);
+    res.status(201).json(stock);
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize C-Stock");
+  }
+});
+
+app.get('/stock/read', async (req, res) => {
+  try {
+    const stocks = await Stock.findAll({
+      include: ['entrepot', 'produit'], // ⚠️ attention ici
+      order: [['date_maj', 'DESC']]
+    });
+    res.status(200).json(stocks);
+  } catch (err) {
+    console.error(err); // Ajoute ceci
+    res.status(500).send("Erreur Sequelize R-Stock");
+  }
+});
+
+
+app.put('/stock/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Stock.update(
+        { ...req.body, date_maj: new Date() },
+        { where: { id: req.params.id } }
+    );
+    if (!updated) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Stock");
+  }
+});
+
+app.delete('/stock/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Stock.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Stock");
+  }
+});
+
+
+app.put('/stock/update/:id', async (req, res) => {
+  try {
+    const [updated] = await Stock.update(
+        { ...req.body, date_maj: new Date() },
+        { where: { id: req.params.id } }
+    );
+    if (!updated) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize U-Stock");
+  }
+});
+
+app.delete('/stock/delete/:id', async (req, res) => {
+  try {
+    const deleted = await Stock.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).send("Stock non trouvé");
+    res.status(200).send("success");
+  } catch (err) {
+    res.status(500).send("Erreur Sequelize D-Stock");
+  }
+});
+
+
+/* ---------- EXPRESS START ---------- */
 app.listen(port, () => {
   console.log(`http://localhost:${port}`);
 });

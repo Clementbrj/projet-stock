@@ -6,12 +6,23 @@ function TableCommande({ selectedProduitId }) {
     const [periode, setPeriode] = useState("all");
 
     useEffect(() => {
-        axios.get('http://localhost:3100/commande/read')
+        axios.get('http://localhost:3100/commande/read2')
             .then((res) => {
+               // console.log("✅ Données reçues depuis /commande/read2 :", res.data);
+
+                if (res.data.length > 0) {
+                    const exemple = res.data[0];
+                    //console.log("🔍 Exemple commande[0].produits :", exemple.produits);
+                    //console.log("🔍 Exemple commande[0].fournisseur :", exemple.fournisseur);
+                }
+
                 setCommandes(res.data);
             })
             .catch((err) => {
                 console.error('❌ Erreur lors de la récupération des commandes :', err);
+                if (err.response) {
+                    console.error('📦 Réponse serveur :', err.response.data);
+                }
             });
     }, []);
 
@@ -41,7 +52,7 @@ function TableCommande({ selectedProduitId }) {
 
     const filteredCommandes = commandes.filter((c) => {
         const matchProduit = selectedProduitId
-            ? parseInt(c.id_produit) === parseInt(selectedProduitId)
+            ? c.produits?.some((p) => parseInt(p.id) === parseInt(selectedProduitId))
             : true;
 
         const matchDate = dateLimit
@@ -82,19 +93,38 @@ function TableCommande({ selectedProduitId }) {
                     <tr>
                         <th>N°Commande</th>
                         <th>Nom Fournisseur</th>
-                        <th>Produit</th>
-                        <th>Quantité</th>
+                        <th>Produit(s)</th>
                         <th>Date</th>
+                        <th>Status</th>
                     </tr>
                     </thead>
                     <tbody>
                     {filteredCommandes.map((c) => (
                         <tr key={c.id}>
                             <td>{c.id}</td>
-                            <td>{c.fournisseur || 'Inconnu'}</td>
-                            <td>{c.produit || 'Inconnu'}</td>
-                            <td>{c.quantite}</td>
-                            <td>{c.date_commande ? new Date(c.date_commande).toLocaleString() : 'Date manquante'}</td>
+                            <td>{c.fournisseur?.nom || 'Fournisseur inconnu'}</td>
+
+                            <td>
+                                {Array.isArray(c.produits) && c.produits.length > 0 ? (
+                                    c.produits.map((p, i) => (
+                                        <span key={i}>
+                                                {p.nom}
+                                            {i < c.produits.length - 1 ? ', ' : ''}
+                                            </span>
+                                    ))
+                                ) : (
+                                    'Produit inconnu'
+                                )}
+                            </td>
+
+
+
+                            <td>
+                                {c.date_commande
+                                    ? new Date(c.date_commande).toLocaleString()
+                                    : 'Date manquante'}
+                            </td>
+                            <td>{c.status}</td>
                         </tr>
                     ))}
                     </tbody>

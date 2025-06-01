@@ -7,7 +7,7 @@ function TableProduit({ selectedProduitId }) {
     useEffect(() => {
         axios.get('http://localhost:3100/produit/read')
             .then((res) => {
-                console.log('✅ Données reçues depuis /produit/read :', res.data); // Voir structure des données
+               // console.log('✅ Données reçues depuis /produit/read :', res.data); // Voir structure des données
                 setProduits(res.data);
             })
             .catch((err) => {
@@ -15,8 +15,8 @@ function TableProduit({ selectedProduitId }) {
             });
     }, []);
 
-    console.log('🔎 selectedProduitId :', selectedProduitId);
-    console.log('📦 Tous les produits :', produits);
+ //   console.log('🔎 selectedProduitId :', selectedProduitId);
+   // console.log('📦 Tous les produits :', produits);
 
     const filteredProduits = selectedProduitId
         ? produits.filter((p) => {
@@ -25,7 +25,7 @@ function TableProduit({ selectedProduitId }) {
         })
         : produits;
 
-    console.log('✅ Produits filtrés :', filteredProduits);
+ //   console.log('✅ Produits filtrés :', filteredProduits);
 
     return (
         <section className="liste-produit">
@@ -35,7 +35,6 @@ function TableProduit({ selectedProduitId }) {
                 <tr>
                     <th>N°Produit</th>
                     <th>Nom</th>
-                    <th>Marque</th>
                     <th>Prix</th>
                 </tr>
                 </thead>
@@ -44,7 +43,6 @@ function TableProduit({ selectedProduitId }) {
                     <tr key={p.id}>
                         <td>{p.id}</td>
                         <td>{p.nom}</td>
-                        <td>{p.marque}</td>
                         <td>{p.prix} €</td>
                     </tr>
                 ))}
