@@ -231,7 +231,7 @@ function CommandePage() {
                                         </>
                                     )}
                                     <td>{prod.nom}</td>
-                                    <td>{prod.quantite}</td>
+                                    <td>{prod.quantite} kg</td>
                                 </tr>
                             ));
                         })}

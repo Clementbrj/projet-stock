@@ -356,7 +356,7 @@ app.post('/stock/create', async (req, res) => {
 app.get('/stock/read', async (req, res) => {
   try {
     const stocks = await Stock.findAll({
-      include: ['entrepot', 'produit'], // ⚠️ attention ici
+      include: ['entrepot', 'produit'],
       order: [['date_maj', 'DESC']]
     });
     res.status(200).json(stocks);

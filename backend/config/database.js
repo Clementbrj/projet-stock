@@ -1,7 +1,8 @@
 // config/database.js
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('filrouge2', 'tech', 'App2025', {
+// MySQL login
+const sequelize = new Sequelize('filrouge', 'tech', 'App2025', {
     host: 'localhost',
     dialect: 'mysql'
 });

@@ -8,20 +8,17 @@ function TableCommande({ selectedProduitId }) {
     useEffect(() => {
         axios.get('http://localhost:3100/commande/read2')
             .then((res) => {
-               // console.log("✅ Données reçues depuis /commande/read2 :", res.data);
 
                 if (res.data.length > 0) {
                     const exemple = res.data[0];
-                    //console.log("🔍 Exemple commande[0].produits :", exemple.produits);
-                    //console.log("🔍 Exemple commande[0].fournisseur :", exemple.fournisseur);
                 }
 
                 setCommandes(res.data);
             })
             .catch((err) => {
-                console.error('❌ Erreur lors de la récupération des commandes :', err);
+                console.error('Erreur lors de la récupération des commandes :', err);
                 if (err.response) {
-                    console.error('📦 Réponse serveur :', err.response.data);
+                    console.error('Réponse serveur :', err.response.data);
                 }
             });
     }, []);
