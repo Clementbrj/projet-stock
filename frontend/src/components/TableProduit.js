@@ -7,25 +7,20 @@ function TableProduit({ selectedProduitId }) {
     useEffect(() => {
         axios.get('http://localhost:3100/produit/read')
             .then((res) => {
-               // console.log('✅ Données reçues depuis /produit/read :', res.data); // Voir structure des données
                 setProduits(res.data);
             })
             .catch((err) => {
-                console.error("❌ Erreur chargement produits :", err);
+                console.error("Erreur chargement produits :", err);
             });
     }, []);
 
- //   console.log('🔎 selectedProduitId :', selectedProduitId);
-   // console.log('📦 Tous les produits :', produits);
-
     const filteredProduits = selectedProduitId
         ? produits.filter((p) => {
-            console.log('🧪 Comparaison :', p.id, '===', selectedProduitId);
+            console.log('Comparaison :', p.id, '===', selectedProduitId);
             return parseInt(p.id) === parseInt(selectedProduitId);
         })
         : produits;
 
- //   console.log('✅ Produits filtrés :', filteredProduits);
 
     return (
         <section className="liste-produit">

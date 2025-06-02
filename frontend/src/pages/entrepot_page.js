@@ -107,6 +107,7 @@ function Entrepot() {
 
                 <div className="container_titre">
                     <select className="select_entrepot" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                        <option>Sort by</option>
                         <option value="nom">Name</option>
                         <option value="adresse">Address</option>
                         <option value="capacite">Capacity</option>
@@ -135,7 +136,7 @@ function Entrepot() {
                                         <tr key={e.id}>
                                             <td>{e.nom}</td>
                                             <td>{e.adresse}</td>
-                                            <td>{e.capacite}</td>
+                                            <td>{e.capacite} kg</td>
                                             <td>
                                                 <button onClick={() => edit(e.id)}>Edit</button>
                                                 <button onClick={() => deleteEntrepot(e.id)}>❌</button>

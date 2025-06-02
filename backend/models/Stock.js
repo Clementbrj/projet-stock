@@ -20,7 +20,7 @@ const Stock = sequelize.define('Stock', {
     timestamps: false
 });
 
-// 👇 Ajoute les associations
+// Ajoute les associations
 Stock.belongsTo(Entrepot, { foreignKey: 'id_entrepot', as: 'entrepot' });
 Stock.belongsTo(Produit, { foreignKey: 'id_produit', as: 'produit' });
 
