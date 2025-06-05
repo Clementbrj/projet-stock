@@ -160,7 +160,7 @@ input:focus, select:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 5%;
+    margin-bottom: 2%;
 }
 
 .select_entrepot, .select_fournisseur {
@@ -324,4 +324,21 @@ input:focus, select:focus {
 .switch-container span {
     color: white;
     font-weight: bold;
+}
+.container_button_action {
+    display: flex;
+    gap: 10px;
+}
+@media (max-width: 1300px) {
+    .ligne-tableaux:first-of-type {
+        flex-direction: column;
+    }
+    .ligne-tableaux > * {
+       width: auto;
+    }
+    .liste-stock{
+        width: 100%;
+    }
+
+
 }

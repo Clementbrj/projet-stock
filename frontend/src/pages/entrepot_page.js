@@ -137,8 +137,10 @@ function Entrepot() {
                                             <td>{e.adresse}</td>
                                             <td>{e.capacite}</td>
                                             <td>
+                                                <div className="container_button_action">
                                                 <button onClick={() => edit(e.id)}>Edit</button>
                                                 <button onClick={() => deleteEntrepot(e.id)}>❌</button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

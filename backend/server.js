@@ -276,7 +276,6 @@ app.get('/commande/read2', async (req, res) => {
 
     res.status(200).json(commandes);
   } catch (err) {
-    console.error("❌ Erreur dans /commande/read2 :", err);
     res.status(500).send("Erreur Sequelize R-Commande");
   }
 });
@@ -287,14 +286,47 @@ app.get('/commande/read2', async (req, res) => {
 
 
 app.put('/commande/update-status/:id', async (req, res) => {
+  const { status } = req.body;
+
   try {
-    const [updated] = await Commande.update({ status: req.body.status }, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).send("Commande non trouvée");
+    const commande = await Commande.findByPk(req.params.id, {
+      include: [
+        { model: Produit, as: 'produits', through: { attributes: ['quantite'] } },
+        { model: Entrepot, as: 'entrepot' }
+      ]
+    });
+
+    if (!commande) return res.status(404).send("Commande non trouvée");
+
+    await Commande.update({ status }, { where: { id: req.params.id } });
+
+    if (status === 'reçue') {
+      for (const produit of commande.produits) {
+        const [stock, created] = await Stock.findOrCreate({
+          where: {
+            id_produit: produit.id,
+            id_entrepot: commande.id_entrepot
+          },
+          defaults: {
+            quantite: 0,
+            date_maj: new Date()
+          }
+        });
+
+        await stock.update({
+          quantite: stock.quantite + produit.ProduitCommande.quantite,
+          date_maj: new Date()
+        });
+      }
+    }
+
     res.status(200).send("success");
   } catch (err) {
+    console.error(err);
     res.status(500).send("Erreur Sequelize U-Commande");
   }
 });
+
 
 app.delete('/commande/delete/:id', async (req, res) => {
   try {

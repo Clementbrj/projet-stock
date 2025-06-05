@@ -123,8 +123,10 @@ function Fournisseur() {
                                             <td>{f.nom}</td>
                                             <td>{f.adresse}</td>
                                             <td>
-                                                <button onClick={() => edit(f.id)}>Edit</button>
-                                                <button onClick={() => deleteFournisseur(f.id)}>❌</button>
+                                                <div className="container_button_action">
+                                                    <button className="button_action" onClick={() => edit(f.id)}>Edit</button>
+                                                    <button className="button_action" onClick={() => deleteFournisseur(f.id)}>❌</button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
