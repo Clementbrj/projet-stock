@@ -11,6 +11,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import android.util.Patterns
 import com.example.filrouge.firebase.FirebaseManager
+import com.google.firebase.auth.FirebaseAuthException
+
+/* -------------
+* Ecran de connexion
+-------------- */
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
@@ -30,6 +35,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        /* -------------
+        * Gestion des erreurs
+        -------------- */
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -61,10 +69,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        /* -------------
+        * démarrer la connexion
+        -------------- */
         Button(
             onClick = {
                 if (email.isBlank() || password.isBlank()) {
-                    Toast.makeText(context, "Champs requis", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Champs obligatoire requis", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
                 if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
@@ -73,12 +84,22 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 }
                 FirebaseManager.auth.signInWithEmailAndPassword(email.trim(), password)
                     .addOnSuccessListener {
-                        Toast.makeText(context, "Connecté avec succès", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Connexion..", Toast.LENGTH_SHORT).show()
                         onLoginSuccess()
                     }
                     .addOnFailureListener {
                         Toast.makeText(context, "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
                     }
+                    .addOnFailureListener {
+                        val errorMessage = when ((it as? FirebaseAuthException)?.errorCode) {
+                            "ERROR_USER_NOT_FOUND" -> "Utilisateur introuvable"
+                            "ERROR_WRONG_PASSWORD" -> "Mot de passe incorrect"
+                            "ERROR_INVALID_EMAIL" -> "Email invalide"
+                            else -> "Erreur : ${it.message}"
+                        }
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                    }
+
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -87,9 +108,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+
+        /* -------------
+        * Echec de connexion
+        -------------- */
         TextButton(onClick = {
             if (email.isBlank() || password.isBlank()) {
-                Toast.makeText(context, "Champs requis", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Champs obligatoire requis", Toast.LENGTH_SHORT).show()
                 return@TextButton
             }
             if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
@@ -104,6 +129,16 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 .addOnFailureListener {
                     Toast.makeText(context, "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
                 }
+                .addOnFailureListener {
+                    val errorMessage = when ((it as? FirebaseAuthException)?.errorCode) {
+                        "ERROR_EMAIL_ALREADY_IN_USE" -> "Cet email est déjà utilisé"
+                        "ERROR_INVALID_EMAIL" -> "Email invalide"
+                        "ERROR_WEAK_PASSWORD" -> "Mot de passe trop faible"
+                        else -> "Erreur : ${it.message}"
+                    }
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                }
+
         }) {
             Text("S'inscrire")
         }

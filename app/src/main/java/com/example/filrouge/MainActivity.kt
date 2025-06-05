@@ -12,7 +12,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.filrouge.firebase.FirebaseManager
 import com.example.filrouge.screens.LoginScreen
-import com.example.filrouge.screens.StockScreen
 import com.example.filrouge.ui.theme.FilrougeTheme
 import com.google.firebase.FirebaseApp
 
