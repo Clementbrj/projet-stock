@@ -254,7 +254,7 @@ function TableStock({ selectedProduitId }) {
                             typeof s.entrepot === "object" ? s.entrepot.nom : s.entrepot;
                         const produitNom =
                             typeof s.produit === "object"
-                                ? `${s.produit.nom} (${s.produit.prix ?? "?"}€)`
+                                ? `${s.produit.nom} `
                                 : s.produit;
 
                         return (

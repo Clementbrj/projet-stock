@@ -348,13 +348,27 @@ app.post('/fournisseur/create', async (req, res) => {
 });
 
 app.get('/fournisseur/read', async (req, res) => {
+  const sortBy = req.query.sortBy || 'nom'; // Valeur par défaut
+
+  // Liste blanche des champs autorisés
+  const allowedSortFields = ['nom', 'adresse'];
+  const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'nom';
+
+  console.log(`[BACK] Endpoint /fournisseur/read hit with sortBy = ${sortBy}`);
+
   try {
-    const fournisseurs = await Fournisseur.findAll({ order: [['nom', 'ASC']] });
+    const fournisseurs = await Fournisseur.findAll({
+      order: [[sortField, 'ASC']]
+    });
+
+    console.log(`[BACK] Sorted result by ${sortField}:`, fournisseurs.map(f => f[sortField]));
     res.status(200).json(fournisseurs);
   } catch (err) {
+    console.error("[BACK] Sequelize error:", err);
     res.status(500).send("Erreur Sequelize R-Fournisseur");
   }
 });
+
 
 app.put('/fournisseur/update/:id', async (req, res) => {
   try {
