@@ -7,6 +7,19 @@
 projet fil rouge.
 édité le : 23/06/2025
 
+# StockManager
+![Repo size](https://img.shields.io/github/repo-size/Clementbrj/projet-stock)
+![Last commit](https://img.shields.io/github/last-commit/Clementbrj/projet-stock)
+![Status](https://img.shields.io/badge/status-en%20cours-yellow)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
+![MySQL](https://img.shields.io/badge/Database-MySQL-orange)
+![Firebase](https://img.shields.io/badge/Auth-Firebase-yellow)
+![Kotlin](https://img.shields.io/badge/Mobile-Kotlin-purple)
+![Status](https://img.shields.io/badge/status-Terminé-brightgreen)
+
+
 # Contexte
 Dans le cadre de notre 3ème année d'étude en développement informatique, ethan et moi-même avons dû réaliser un projet comprenant une application web et une application mobile.
 
