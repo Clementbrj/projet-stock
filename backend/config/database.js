@@ -1,7 +1,7 @@
 // config/database.js
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('filrouge2', 'tech', 'App2025', {
+const sequelize = new Sequelize('filrouge2', 'tech', '12345', {
     host: 'localhost',
     dialect: 'mysql'
 });
