@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuthException
 -------------- */
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(onLoginSuccess: (token: String) -> Unit) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -84,11 +84,20 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 }
                 FirebaseManager.auth.signInWithEmailAndPassword(email.trim(), password)
                     .addOnSuccessListener {
-                        Toast.makeText(context, "Connexion..", Toast.LENGTH_SHORT).show()
-                        onLoginSuccess()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(context, "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
+                        // Récupérer le token Firebase
+                        FirebaseManager.auth.currentUser?.getIdToken(true)
+                            ?.addOnSuccessListener { result ->
+                                val token = result.token
+                                if (token != null) {
+                                    Toast.makeText(context, "Connexion réussie", Toast.LENGTH_SHORT).show()
+                                    onLoginSuccess(token)
+                                } else {
+                                    Toast.makeText(context, "Erreur récupération token", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            ?.addOnFailureListener { e ->
+                                Toast.makeText(context, "Erreur récupération token : ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                     }
                     .addOnFailureListener {
                         val errorMessage = when ((it as? FirebaseAuthException)?.errorCode) {
@@ -108,9 +117,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-
         /* -------------
-        * Echec de connexion
+        * Inscription
         -------------- */
         TextButton(onClick = {
             if (email.isBlank() || password.isBlank()) {
@@ -123,11 +131,19 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             }
             FirebaseManager.auth.createUserWithEmailAndPassword(email.trim(), password)
                 .addOnSuccessListener {
-                    Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
-                    onLoginSuccess()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(context, "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
+                    FirebaseManager.auth.currentUser?.getIdToken(true)
+                        ?.addOnSuccessListener { result ->
+                            val token = result.token
+                            if (token != null) {
+                                Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
+                                onLoginSuccess(token)
+                            } else {
+                                Toast.makeText(context, "Erreur récupération token", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        ?.addOnFailureListener { e ->
+                            Toast.makeText(context, "Erreur récupération token : ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                 }
                 .addOnFailureListener {
                     val errorMessage = when ((it as? FirebaseAuthException)?.errorCode) {

@@ -37,8 +37,8 @@ fun MainContent() {
 
     NavHost(
         navController = navController,
-       // startDestination = if (FirebaseManager.isUserLoggedIn()) "stock" else "login"
-        startDestination = "stock" // ⛔️ forcer le saut de connexion
+        startDestination = if (FirebaseManager.isUserLoggedIn()) "stock" else "login"
+        //startDestination = "stock" // ⛔️ forcer le saut de connexion
     ) {
         composable("login") {
             LoginScreen(onLoginSuccess = {
