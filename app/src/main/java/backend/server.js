@@ -165,18 +165,8 @@ app.get('/stock/read', async (req, res) => {
   }
 });
 
-app.put('/stock/update/:id', async (req, res) => {
-  try {
-    const [updated] = await Stock.update(
-        { ...req.body, date_maj: new Date() },
-        { where: { id: req.params.id } }
-    );
-    if (!updated) return res.status(404).send("Stock non trouvé");
-    res.status(200).send("success");
-  } catch (err) {
-    res.status(500).send("Erreur Sequelize U-Stock");
-  }
-});
+
+
 
 app.delete('/stock/delete/:id', async (req, res) => {
   try {
@@ -414,10 +404,17 @@ app.get('/stock/read', async (req, res) => {
 
 
 app.put('/stock/update/:id', async (req, res) => {
+  const { quantite } = req.body;
+
+  // Validation métier : quantité doit être >= 0
+  if (quantite != null && (typeof quantite !== 'number' || quantite < 0)) {
+    return res.status(422).send("Quantité invalide : doit être un nombre positif ou zéro");
+  }
+
   try {
     const [updated] = await Stock.update(
-        { ...req.body, date_maj: new Date() },
-        { where: { id: req.params.id } }
+      { ...req.body, date_maj: new Date() },
+      { where: { id: req.params.id } }
     );
     if (!updated) return res.status(404).send("Stock non trouvé");
     res.status(200).send("success");

@@ -55,16 +55,25 @@ class StockViewModel : ViewModel() {
             try {
                 val request = StockUpdateRequest(quantite, valeur)
                 val response = RetrofitClient.apiService.updateStock(stockId, request)
-                if (response.isSuccessful) {
-                    fetchStocks() // recharge les stocks après mise à jour
-                } else {
-                    println("Erreur update: ${response.code()}")
+                when {
+                    response.isSuccessful -> {
+                        fetchStocks() // recharge les stocks après mise à jour
+                    }
+                    response.code() == 422 -> {
+                        val errorMsg = response.errorBody()?.string() ?: "Erreur de validation"
+                        println("Erreur 422: $errorMsg")
+                        // Ici, tu peux par exemple émettre un état UI spécifique ou afficher un toast
+                    }
+                    else -> {
+                        println("Erreur update: ${response.code()}")
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
 
     fun selectEntrepot(id: Int?) {
         _selectedEntrepotId.value = id

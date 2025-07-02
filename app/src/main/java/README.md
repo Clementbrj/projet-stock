@@ -59,6 +59,7 @@ Installer les dépendances dans un terminal :
 
     cd app/src/main/java/backend
     npm install express mysql2 sequelize cors
+    npm start
 
 #### Initialiser la BDD MySQL
 
