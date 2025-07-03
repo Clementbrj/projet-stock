@@ -5,7 +5,7 @@
 
 
 projet fil rouge.
-édité le : 03/07/2025
+édité le : 30/06/2025
 
 # StockManager
 ![Repo size](https://img.shields.io/github/repo-size/Clementbrj/projet-stock)
@@ -53,13 +53,15 @@ Le projet doit inclure un système de connexion, un back-end et un front-end, av
 
 Avant d’installer et d’exécuter l’application mobile, assurez-vous d’avoir :
 
-- **Cloné le projet** depuis le dépôt GitHub en ciblant directement la branche `rendu-mobile` :
+- **Cloner le projet** depuis le dépôt GitHub en ciblant directement la branche `rendu-mobile` :
 
   ```bash
   git clone --branch rendu-mobile https://github.com/Clementbrj/projet-stock.git
   cd projet-stock
+- Un serveur MySQL installé sur votre machine. Vous pouvez utiliser un serveur MySQL natif ou un environnement tout-en-un comme WAMP ou XAMPP qui inclut MySQL et facilite sa gestion.
 - [Android Studio](https://developer.android.com/studio) installé
 - Un émulateur Android configuré ou un appareil Android physique
+
 
 💡 **Remarque** :  
 L'application utilise la version **`8.9.2`** du **Android Gradle Plugin (AGP)**.  
@@ -79,7 +81,7 @@ Installer les dépendances dans un terminal :
 
 #### Initialiser la BDD MySQL
 
-Avoir [Mysql Server](https://dev.mysql.com/downloads/installer/), ouvrir le terminal de MySQL, connecter vous à l'utilisateur root(où admin) puis :
+Avoir [Mysql Server](https://dev.mysql.com/downloads/installer/) ou wamp/xampp, ouvrir le terminal de MySQL, connecter vous à l'utilisateur root(où admin) puis :
 
     CREATE DATABASE filrouge; --(créer la DB)
 
