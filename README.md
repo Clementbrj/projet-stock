@@ -195,6 +195,3 @@ Objectif : score supérieur à 80 sur l’accessibilité, la performance et les 
 - Navigation clavier fonctionnelle
 - Composants réutilisables avec aria-labels
 
-<div align="center">
-  <img src="image.png" alt="coucou" width="256" height="256"/>
-</div>
