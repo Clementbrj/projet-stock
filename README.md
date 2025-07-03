@@ -49,7 +49,7 @@ Le projet doit inclure un système de connexion, un back-end et un front-end, av
 
 
 ## Installation Mobile
-### 📋 Prérequis
+### Prérequis
 
 Avant d’installer et d’exécuter l’application mobile, assurez-vous d’avoir :
 
@@ -63,7 +63,7 @@ Avant d’installer et d’exécuter l’application mobile, assurez-vous d’av
 - Un émulateur Android configuré ou un appareil Android physique
 
 
-💡 **Remarque** :  
+**Remarque** :  
 L'application utilise la version **`8.9.2`** du **Android Gradle Plugin (AGP)**.  
 Pour vérifier que vous utilisez bien cette version (ou une version plus récente), consultez le fichier [`libs.versions.toml`](./gradle/libs.versions.toml).
 
