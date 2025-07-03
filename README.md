@@ -5,7 +5,7 @@
 
 
 projet fil rouge.
-édité le : 30/06/2025
+édité le : 03/07/2025
 
 # StockManager
 ![Repo size](https://img.shields.io/github/repo-size/Clementbrj/projet-stock)
