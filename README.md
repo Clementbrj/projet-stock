@@ -36,18 +36,14 @@ Le projet doit inclure un système de connexion, un back-end et un front-end, av
 
 ## Sommaire
 - [Contexte](#contexte)
-- [Installation WEB](#installation-web)
+- [Installation Mobile](#installation-mobile)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Installation Mobile](#installation-mobile)
-  - [Backend](#backend-1)
-  - [Frontend](#frontend-1)
-- [Présentation fonctionnelle](#présentation-fonctionnelle)
+- [Présentation fonctionnels](#présentation-fonctionnels)
 - [Technologies utilisées](#technologies-utilisées)
 - [Sécurité & RGPD](#sécurité--rgpd)
 - [Accessibilité & Performance](#accessibilité--performance)
-
-
+  
 ## Installation Mobile
 ### Prérequis
 
