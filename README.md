@@ -37,7 +37,7 @@ Le projet doit inclure un système de connexion, un back-end et un front-end, av
 ## Sommaire
 - [Contexte](#contexte)
 - [Installation Mobile](#installation-mobile)
-  - [Prérequis](#prerequis)
+  - [Prérequis](#prérequis)
   - [Backend](#backend)
   - [Frontend](#frontend)
 - [Présentation fonctionnels](#presentation-fonctionnels)
