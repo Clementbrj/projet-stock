@@ -5,7 +5,7 @@
 
 
 projet fil rouge.
-édité le : 30/06/2025
+édité le : 03/07/2025
 
 # StockManager
 ![Repo size](https://img.shields.io/github/repo-size/Clementbrj/projet-stock)
@@ -46,10 +46,26 @@ Le projet doit inclure un système de connexion, un back-end et un front-end, av
 - [Technologies utilisées](#technologies-utilisées)
 - [Sécurité & RGPD](#sécurité--rgpd)
 - [Accessibilité & Performance](#accessibilité--performance)
-- [Améliorations futures](#améliorations-futures)
 
 
 ## Installation Mobile
+### 📋 Prérequis
+
+Avant d’installer et d’exécuter l’application mobile, assurez-vous d’avoir :
+
+- **Cloné le projet** depuis le dépôt GitHub en ciblant directement la branche `rendu-mobile` :
+
+  ```bash
+  git clone --branch rendu-mobile https://github.com/Clementbrj/projet-stock.git
+  cd projet-stock
+- [Android Studio](https://developer.android.com/studio) installé
+- Un émulateur Android configuré ou un appareil Android physique
+
+💡 **Remarque** :  
+L'application utilise la version **`8.9.2`** du **Android Gradle Plugin (AGP)**.  
+Pour vérifier que vous utilisez bien cette version (ou une version plus récente), consultez le fichier [`libs.versions.toml`](./gradle/libs.versions.toml).
+
+---
 ### Backend
 Notre back-end web fonctionne en deux parties, le stockage des données avec une BDD MySQL et le serveur express.
 
@@ -118,24 +134,24 @@ puis créer les tables :
     FOREIGN KEY (id_produit) REFERENCES produit(id)
     );
 
-CREATE TABLE commande (
-id INT PRIMARY KEY AUTO_INCREMENT,
-id_fournisseur INT,
-id_entrepot INT,
-date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-status VARCHAR(50) DEFAULT 'en attente',
-FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id),
-FOREIGN KEY (id_entrepot) REFERENCES entrepot(id)
-);
-
-CREATE TABLE produit_commande (
-id_commande INT,
-id_produit INT,
-quantite INT,
-PRIMARY KEY (id_commande, id_produit),
-FOREIGN KEY (id_commande) REFERENCES commande(id),
-FOREIGN KEY (id_produit) REFERENCES produit(id)
-);
+    CREATE TABLE commande (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_fournisseur INT,
+    id_entrepot INT,
+    date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'en attente',
+    FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id),
+    FOREIGN KEY (id_entrepot) REFERENCES entrepot(id)
+    );
+    
+    CREATE TABLE produit_commande (
+    id_commande INT,
+    id_produit INT,
+    quantite INT,
+    PRIMARY KEY (id_commande, id_produit),
+    FOREIGN KEY (id_commande) REFERENCES commande(id),
+    FOREIGN KEY (id_produit) REFERENCES produit(id)
+    );
 
 **Modifier la config back-end MySQL**
 
@@ -194,4 +210,3 @@ Objectif : score supérieur à 80 sur l’accessibilité, la performance et les 
 - Interface responsive
 - Navigation clavier fonctionnelle
 - Composants réutilisables avec aria-labels
-
